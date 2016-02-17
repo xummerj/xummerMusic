@@ -12,17 +12,18 @@ import React, {
   View
 } from 'react-native';
 var Lrc = require('./components/common/Lrc');
+var Player = require('./components/common/Player');
 var Sound = require('react-native-sound');
 class xummerMusic extends Component {
   constructor(props) {
     super(props);
-    this.state = {time:0};
+    this.state = {time:0,musicUrl:""};
   }    
   render() {
 
     return (
       <View>
-        
+        <Player musicUrl={this.state.musicUrl} />
 
         <TouchableHighlight onPress={this._onPressButton.bind(this)}>
           <Text>点我</Text>
@@ -31,21 +32,21 @@ class xummerMusic extends Component {
     );
   }
   _onPressButton() {
-    this.setState({time: 50});
+    this.setState({time: 50,musicUrl: "http://www.xummer.cn/musicplayer/music/111.mp3"});
 
 
-    // Load the sound file 'whoosh.mp3' from the app bundle
-    var whoosh = new Sound('music.mp3', Sound.MAIN_BUNDLE, (error) => {
-      if (error) {
-        console.log('failed to load the sound', error);
-      } else { // loaded successfully
-        whoosh.setVolume(1).play();
-        console.log(whoosh);
-        console.log('duration in seconds: ' + whoosh._duration +
-            'number of channels: ' + whoosh._numberOfChannels);
+    // // Load the sound file 'whoosh.mp3' from the app bundle
+    // var whoosh = new Sound('music.mp3', Sound.MAIN_BUNDLE, (error) => {
+    //   if (error) {
+    //     console.log('failed to load the sound', error);
+    //   } else { // loaded successfully
+    //     whoosh.setVolume(1).play();
+    //     console.log(whoosh);
+    //     console.log('duration in seconds: ' + whoosh._duration +
+    //         'number of channels: ' + whoosh._numberOfChannels);
         
-      }
-    });
+    //   }
+    // });
 
     
 
