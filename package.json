@@ -1,0 +1,13 @@
+{
+  "name": "xummerMusic",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "react-native start"
+  },
+  "dependencies": {
+    "react-native": "^0.19.0",
+    "react-native-fs": "^1.2.0",
+    "react-native-sound": "^0.7.3"
+  }
+}
