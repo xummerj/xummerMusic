@@ -13,7 +13,7 @@ import React, {
 } from 'react-native';
 var Lrc = require('./components/common/Lrc');
 var Player = require('./components/common/Player');
-var Sound = require('react-native-sound');
+
 class xummerMusic extends Component {
   constructor(props) {
     super(props);

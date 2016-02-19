@@ -15,82 +15,78 @@ var {
   Image,
 } = React;
 var Sound = require('react-native-sound');
-var RNFS = require('react-native-fs');
-var musicDir = RNFS.DocumentDirectoryPath + '/music';
-var jobId1 = -1;
+var Spectrum = require('./Spectrum');
 var Player = React.createClass({
+	sound:null,
   getInitialState: function() {
     return {
       musicUrl:"",
-      output: 'Doc folder: ' + RNFS.DocumentDirectoryPath
+      isPlay:false,
+      isStop:true,
+      output:"",
+      spectrumData:""
+
     };
   },
-  componentWillReceiveProps: function(){
-    if(this.props.musicUrl!=this.state.musicUrl){
-      this.downloadMusic(this.props.musicUrl);
+  componentWillReceiveProps: function(nextProps){
+  	console.log(this.props.musicUrl,nextProps.musicUrl);
+    if(this.props.musicUrl !== nextProps.musicUrl){
+      this.playMusic(nextProps.musicUrl);
     }
   },
-  mkdirMusic: function() {
-    return RNFS.mkdir(musicDir).then(success => {
-      var text = success.toString();
-      this.setState({ output: text });
-    }).catch(err => this.showError(err));
-  },
-  downloadMusic: function(downloadUrl) {
-    var progress1 = data => {
-      var text = JSON.stringify(data);
-      this.setState({ output: text });
-    };
-    var begin1 = res => {
-      jobId1 = res.jobId;
-    };
-    let localMusic = musicDir + '/' + decodeURI(downloadUrl.substr(downloadUrl.lastIndexOf("/")+1));
-    
-    RNFS.downloadFile(downloadUrl, localMusic, begin1, progress1).then(
-      res => {
-          this.setState({ output: JSON.stringify(res), musicurl:downloadUrl})
-          var whoosh = new Sound(localMusic, Sound.MAIN_BUNDLE, (error) => {
-            if (error) {
-              console.log('failed to load the sound', error);
-            } else { // loaded successfully
-              whoosh.play();
-              console.log(localMusic);
-              console.log('duration in seconds: ' + whoosh._duration +
-                  'number of channels: ' + whoosh._numberOfChannels);
-              
-            }
-          });
-    }).catch(err => this.showError(err));
+  playMusic:function(url){
+  	console.log(url);
 
-    
+	  	var Visualizer = data => {
+	  		//this.spectrumData = data.waveform;
+	      // var text = JSON.stringify(data);
+	      this.setState({spectrumData: data.waveform});
+	    };
+    	this.sound = new Sound(url, Sound.MAIN_BUNDLE, (error) => {
+	        if (error) {
+	          console.log('failed to load the sound', error);
+	        } else { // loaded successfully
+	          this.sound.play(
+	          function(){
 
+	          },Visualizer);
+	          console.log('duration in seconds: ' + this.sound._duration +
+	              'number of channels: ' + this.sound._numberOfChannels);
+	        }
+      });
   },
-  showError: function(err){
-    console.log(err);
-    //this.setState({ output: err.toString() });
+  render:function(){
+  	return (
+  		<View>
+  			<Spectrum spectrumData={this.state.spectrumData}/>
+  		</View>
+  	);
   },
-  stopDownloadTest: function() {
-    RNFS.stopDownload(jobId1);
-    RNFS.stopDownload(jobId2);
-  },
-  render: function() {
-    return (
-      <View style={styles.container}> 
-        <Text style={styles.text}>{this.state.output}</Text>
-      </View>
-    );
+  playCompletion: function(){
+
   }
 });
-var styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#F5FCFF',
   },
-  text: {
-    fontSize: 16,
+  welcome: {
+    fontSize: 20,
     textAlign: 'center',
     margin: 10,
-  }
+  },
+  instructions: {
+    textAlign: 'center',
+    color: '#333333',
+    marginBottom: 5,
+  },
 });
 
 module.exports = Player;
+
+
+
+    
