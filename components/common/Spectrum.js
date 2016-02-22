@@ -11,6 +11,7 @@ var {
   StyleSheet,
   Text,
   View,
+  Animated,
   TouchableHighlight,
   Image,
 } = React;
@@ -21,7 +22,8 @@ var Spectrum = React.createClass({
   getInitialState: function() {
     return {
       spectrumData: null,
-      capHeightData: []
+      capHeightData: [],
+      anim: Array(40).fill(0).map(() => new Animated.Value(0)) // 初始化3个值
     };
   },
   componentWillReceiveProps: function(nextProps){
@@ -32,46 +34,44 @@ var Spectrum = React.createClass({
   },
   render: function() {
     //renderCanvas();
+    console.log(this.state);
     //this.state.capHeightData.map(function(height){return <View style={[styles.caps, {height:height}]}></View>})
-    console.log(this.state.capHeightData);
     var i=0;
     return (
       <View style={styles.container}>{
-        this.state.capHeightData.map(function(height){i++;return <View key={i} style={[styles.caps, {height:height}]}></View>})
+        this.state.anim.map(function(height){i++;return <Animated.View key={i} style={[styles.caps, {height:height}]}></Animated.View>})
       }
       </View>
     );
   },
   _getCapHeight: function(spectrumData) {
-            var meterNum = 40;
-            var step = Math.round(spectrumData.length / meterNum); //计算采样步长
-            var arr = [];
+    var timing = Animated.timing;
+    for(let i=0;i<40;i++){
+      timing(this.state.anim[i], {toValue: spectrumData[i],duration}).start();
+    }     
+            // var meterNum = 40;
+            // var step = Math.round(spectrumData.length / meterNum); //计算采样步长
+            // var arr = [];
 
-            for (var i = 2,j=1; j < meterNum; i++) {
-
-                var val = Math.hypot(spectrumData[i], spectrumData[i + 1]);
-
-                i += 2; 
-                arr[j] = val/256 * 100; 
-                j++;
-                //获取当前能量值
-                // if (capYPositionArray.length < Math.round(meterNum)) {
-                //     capYPositionArray.push(value); //初始化保存帽头位置的数组，将第一个画面的数据压入其中
-                // };
-                // ctx.fillStyle = capStyle;
-                // //开始绘制帽头
-                // if (value < capYPositionArray[i]) { //如果当前值小于之前值
-                //     ctx.fillRect(i * capWidth, cheight - (--capYPositionArray[i]), meterWidth, capHeight); //则使用前一次保存的值来绘制帽头
-                // } else {
-                //     ctx.fillRect(i * capWidth, cheight - value, meterWidth, capHeight); //否则使用当前值直接绘制
-                //     capYPositionArray[i] = value;
-                // };
-                // //开始绘制频谱条
-                // ctx.fillStyle = gradient;
-                // ctx.fillRect(i * capWidth, cheight - value + capHeight, meterWidth, cheight);
-            }
-            arr.reverse();
-            this.setState({capHeightData:arr});
+            // for (var i = 0; i < meterNum; i++) {
+            //     arr[i] = spectrumData[i*step];
+            //     //获取当前能量值
+            //     // if (capYPositionArray.length < Math.round(meterNum)) {
+            //     //     capYPositionArray.push(value); //初始化保存帽头位置的数组，将第一个画面的数据压入其中
+            //     // };
+            //     // ctx.fillStyle = capStyle;
+            //     // //开始绘制帽头
+            //     // if (value < capYPositionArray[i]) { //如果当前值小于之前值
+            //     //     ctx.fillRect(i * capWidth, cheight - (--capYPositionArray[i]), meterWidth, capHeight); //则使用前一次保存的值来绘制帽头
+            //     // } else {
+            //     //     ctx.fillRect(i * capWidth, cheight - value, meterWidth, capHeight); //否则使用当前值直接绘制
+            //     //     capYPositionArray[i] = value;
+            //     // };
+            //     // //开始绘制频谱条
+            //     // ctx.fillStyle = gradient;
+            //     // ctx.fillRect(i * capWidth, cheight - value + capHeight, meterWidth, cheight);
+            // }
+            this.setState({capHeightData:spectrumData});
   }
 });
 
