@@ -18,42 +18,49 @@ var lrcData = null;
 
 var Lrc = React.createClass({
   componentDidMount() {
-    this._loadLrcRow();
+    this._loadLrcRow(this.props.lrcUrl);
   },
-  componentWillReceiveProps(){
-    if(this.props.lrcUrl!=this.state.lrcUrl){
-      this._loadLrcRow();
+  componentWillReceiveProps(nextProps){
+    if(this.props.lrcUrl!=nextProps.lrcUrl){
+      this._loadLrcRow(nextProps.lrcUrl);
     }
-    this.state.marginTop.stopAnimation();
-    Animated.timing(this.state.marginTop, {
-            toValue: 0, // 目标值
-            duration: 12500 // 动画时间
-          }).start();
-    //this.props.
+    if(this.state.currentime.toFixed(1)!=nextProps.currentime.toFixed(1)){
+      let index = 0;
+      let lrcRow = this.state.lrcRow;
+      for(let i=0; i<lrcRow.length; i++){
+         if(lrcRow[i].timed.toFixed(1) == nextProps.currentime.toFixed(1)){
+           index=i;
+           break;
+         }
+      }
+      if(index > 0){
+        this.setState({currentime:nextProps.currentime});
+        let times = (lrcRow[index].timed-lrcRow[index-1].timed)*1000;
+        //console.log(times,-(26*index))
+        Animated.timing(this.state.marginTop, {
+                toValue: -(32*index), // 目标值
+                duration: times // 动画时间
+              }).start();
+        this._setLrcView(index);
+      }
+    }
   },
   getInitialState() {
     return {
-      marginTop : new Animated.Value(0),
-      musicName : "",
-      lrcUrl: "",
-      message: "",
-      lrcRow : []
+      marginTop :new Animated.Value(0),
+      lrcUrl:"",
+      lrcRow :[],
+      lrcView :[],
+      currentime :0
     };
   },
   render() {
-    var view = [];
-    if(this.state.lrcRow.length>0){
-      this.state.lrcRow.map(function(row){view.push(<Text key={row.time} data-time={row.time} style={styles.lrcRow}>{row.content}</Text>);});
-    }
-    console.log(view);
+
+    //console.log(view);
     //this.state.lrcRow.map(function(row){return <div>Hello, {row.time}!</div>})
     return (
       <Animated.View style={[styles.container,{marginTop:this.state.marginTop}]}>
-        <Text style={styles.welcome}>
-        {this.state.lrcUrl}
-        {this.state.message}
-        </Text>
-        {view}
+        {this.state.lrcView}
       </Animated.View>
     );
   },
@@ -108,23 +115,19 @@ var Lrc = React.createClass({
             //然后取出歌词信息
             if(item.length < 1 || !(item = regex.exec(item))) continue;
             while(item_time = regex_time.exec(item[1])) {
-                list.push({time:parseFloat(item_time[1])*60+parseFloat(item_time[2])-1, content:item[2]});
+                list.push({timed:parseFloat(item_time[1])*60+parseFloat(item_time[2])-1, content:item[2]});
             }
             if(list.length > 0) {
             /* 对时间轴排序 */
-              list.sort(function(a,b){ return a.time-b.time; });
-              if(list[0].time >= 0.1) list.unshift({tiem:list[0].time-0.1, content:''});
-              list.push( {time:list[list.length-1].time+1, content:''} );
+              list.sort(function(a,b){ return a.timed-b.timed; });
+              //if(list[0].timed >= 0.1) list.unshift({timed:list[0].timed-0.1, content:''});
+              //list.push( {time:list[list.length-1].time+1, content:''} );
             }
             //this.regex_time.lastIndex = 0;
         }
-        
-       
         return list;
     },
-    _loadLrcRow:function(){
-      var lrcUrl = this.props.lrcUrl;
-      //this.setState({lrcUrl:lrcUrl});
+    _loadLrcRow:function(lrcUrl){
       var _this = this;
       var lrcData = [];
       AsyncStorage.getItem(lrcUrl)
@@ -132,6 +135,7 @@ var Lrc = React.createClass({
         if (value !== null){
           let lrcRow = _this._parseLrc(value);
           this.setState({lrcUrl:lrcUrl,lrcRow:lrcRow});
+          this._setLrcView(0);
         } else {
            //this._appendMessage('Initialized with no selection on disk.');
            this._getLrcData(lrcUrl,{},
@@ -139,12 +143,21 @@ var Lrc = React.createClass({
               let lrcRow = json[0]['content'];
               _this._onValueChange(lrcUrl,lrcRow);
               _this.setState({lrcUrl:lrcUrl,lrcRow:_this._parseLrc(lrcRow)});
+              _this._setLrcView(0);
             }
            );
         }
       })
       .catch((error) => this._appendMessage('AsyncStorage error1: ' + error.message))
       .done();
+    },
+    _setLrcView:function(index){
+      //console.log(index,this.state.lrcRow)
+      var view = [];
+      if(this.state.lrcRow.length>0){
+        this.state.lrcRow.map(function(row,i){view.push(<Text key={"a"+row.timed} data-time={row.timed} style={[styles.lrcRow,{color:i==index?"#00ffff":"#000"}]}>{row.content}</Text>);});
+        this.setState({lrcView:view});
+      }
     }
 });
 
@@ -158,6 +171,7 @@ const styles = StyleSheet.create({
   },
   lrcRow: {
     fontSize: 20,
+    height: 26,
     alignItems: 'flex-start',
     textAlign: 'center',
     margin: 3,

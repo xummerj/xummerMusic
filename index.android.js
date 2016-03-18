@@ -13,14 +13,14 @@ import React, {
 } from 'react-native';
 var Lrc = require('./components/common/Lrc');
 var Player = require('./components/common/Player');
-
+var Canvas = require('./components/common/Canvas');
 class xummerMusic extends Component {
   constructor(props) {
     super(props);
     this.state = {time:0,musicUrl:""};
   }    
   render() {
-
+    console.log(1123)
     return (
       <View>
         <Player musicUrl={this.state.musicUrl} />

@@ -38,7 +38,8 @@ public class MainActivity extends ReactActivity {
       return Arrays.<ReactPackage>asList(
         new MainReactPackage(),
               new RNSoundPackage(),
-              new RNFSPackage()
+              new RNFSPackage(),
+              new ReactSpectrumPackage()
       );
     }
 }

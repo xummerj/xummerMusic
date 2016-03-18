@@ -15,7 +15,8 @@ var {
   Image,
 } = React;
 var Sound = require('react-native-sound');
-var Spectrum = require('./Spectrum');
+var Spectrum = require('./CanvasView');
+var Lrc = require('./Lrc');
 var Player = React.createClass({
 	sound:null,
   getInitialState: function() {
@@ -24,7 +25,8 @@ var Player = React.createClass({
       isPlay:false,
       isStop:true,
       output:"",
-      spectrumData:""
+      spectrumData:[],
+      currentime:0
 
     };
   },
@@ -34,12 +36,12 @@ var Player = React.createClass({
       this.playMusic(nextProps.musicUrl);
     }
   },
-  playMusic:function(url){
-  	console.log(url);
+  playMusic: function(url){
 
 	  	var Visualizer = data => {
 	  		//this.spectrumData = data.waveform;
 	      // var text = JSON.stringify(data);
+	      this.sound.getCurrentTime((seconds) => this.setState({currentime:seconds}) );
 	      this.setState({spectrumData: data.waveform});
 	    };
     	this.sound = new Sound(url, Sound.MAIN_BUNDLE, (error) => {
@@ -55,10 +57,11 @@ var Player = React.createClass({
 	        }
       });
   },
-  render:function(){
+  render: function(){
+  	//console.log(2222222222222222,typeof this.state.spectrumData);
   	return (
-  		<View>
-  			<Spectrum spectrumData={this.state.spectrumData}/>
+  		<View style={styles.container}>
+  			<Spectrum style={{width:200,height:100,backgroundColor: '#000'}} fft={this.state.spectrumData}/>
   		</View>
   	);
   },
@@ -68,7 +71,9 @@ var Player = React.createClass({
 });
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 5,
+    height:200,
+    flexDirection:'column',
     justifyContent: 'center',
     alignItems: 'flex-start',
     backgroundColor: '#F5FCFF',

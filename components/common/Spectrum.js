@@ -12,6 +12,7 @@ var {
   Text,
   View,
   Animated,
+  Easing,
   TouchableHighlight,
   Image,
 } = React;
@@ -19,11 +20,13 @@ var {
 
 var Spectrum = React.createClass({
 	sound:null,
+  odata:[],
   getInitialState: function() {
     return {
       spectrumData: null,
       capHeightData: [],
-      anim: Array(40).fill(0).map(() => new Animated.Value(0)) // 初始化3个值
+      anim: Array(40).fill(0).map(() => new Animated.Value(0)),// 初始化3个值
+      anim_h: Array(40).fill(0).map(() => new Animated.Value(0)),
     };
   },
   componentWillReceiveProps: function(nextProps){
@@ -33,22 +36,24 @@ var Spectrum = React.createClass({
     }
   },
   render: function() {
-    //renderCanvas();
-    console.log(this.state);
-    //this.state.capHeightData.map(function(height){return <View style={[styles.caps, {height:height}]}></View>})
     var i=0;
+    let _this= this;
     return (
       <View style={styles.container}>{
-        this.state.anim.map(function(height){i++;return <Animated.View key={i} style={[styles.caps, {height:height}]}></Animated.View>})
+        this.state.anim.map(function(height){i++;return <View key={"v"+i}><Animated.View key={"a"+i} style={[styles.caps_h, {marginBottom:_this.state.anim_h[i]}]}></Animated.View><Animated.View key={i} style={[styles.caps, {height:height}]} /></View>})
       }
       </View>
     );
   },
   _getCapHeight: function(spectrumData) {
+
     var timing = Animated.timing;
+    //console.log(spectrumData);
     for(let i=0;i<40;i++){
-      timing(this.state.anim[i], {toValue: spectrumData[i],duration}).start();
-    }     
+      timing(this.state.anim[i], {toValue: spectrumData[i]<1?0:spectrumData[i+1],duration:50}).start();
+      timing(this.state.anim_h[i], {toValue: spectrumData[i+1]>this.odata[i]?10:0,duration:100}).start();
+    }
+    this.odata = spectrumData;  
             // var meterNum = 40;
             // var step = Math.round(spectrumData.length / meterNum); //计算采样步长
             // var arr = [];
@@ -82,13 +87,19 @@ const styles = StyleSheet.create({
     flexDirection:'row',
     justifyContent: 'center',
     alignItems: 'flex-end',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#000',
   },
   caps: {
-    width: 5,
-    marginLeft:1,
+    width: 4,
+    marginRight:0.8,
     backgroundColor:'#0f0',
     height:10,
+  },
+  caps_h: {
+    width: 4,
+    marginRight:0.8,
+    backgroundColor:'#FFF',
+    height:1,
   },
 
 });
